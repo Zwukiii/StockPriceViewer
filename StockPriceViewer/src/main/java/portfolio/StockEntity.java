@@ -24,7 +24,7 @@ public class StockEntity {
 
     @NotBlank
     @Column(nullable = false, unique = true)
-    private String symbol;
+    private String ticket;
 
     @NotBlank
     @Column(nullable = false)
