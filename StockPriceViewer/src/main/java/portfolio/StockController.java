@@ -43,6 +43,12 @@ public class StockController {
          return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/{ticker}")
+    public ResponseEntity<StockResponseDTO> getSingleStock(@PathVariable String ticker) {
+        StockEntity stock = stockService.getStockByTicker(ticker);
+        return ResponseEntity.ok(mapToDto(stock));
+    }
+
 
     private StockResponseDTO mapToDto(StockEntity stock) {
         return new StockResponseDTO(

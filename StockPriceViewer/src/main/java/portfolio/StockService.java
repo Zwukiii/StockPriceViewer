@@ -46,8 +46,12 @@ public class StockService {
 
     }
 
-    public StockEntity deleteStock(String ticket) {
+    public void deleteStock(String ticket) {
         StockEntity stockTicket = stockRepository.findByTicket(ticket).orElseThrow(() -> new RuntimeException("Stock not found!"));
         stockRepository.delete(stockTicket);
+    }
+
+    public StockEntity getStockByTicker(String ticker) {
+        return stockRepository.findByTicket(ticker).orElseThrow(() -> new StockNotFoundException(ticker));
     }
 }
