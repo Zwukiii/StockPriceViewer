@@ -23,4 +23,6 @@ public class StockResponseDTO {
         this.currentPrice = currentPrice;
         this.lastUpdated = lastUpdated;
     }
+
+
 }

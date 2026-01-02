@@ -1,15 +1,12 @@
 package portfolio;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@RequestMapping("/api/stocks")
 public class StockController {
     private StockService stockService;
 
@@ -17,9 +14,9 @@ public class StockController {
         this.stockService = stockService;
     }
 
-    @PostMapping("/api/stocks/{ticket}")
-    public ResponseEntity<StockResponseDTO> createStock(@PathVariable String ticket) {
-        StockEntity stock = stockService.createStock(ticket);
+    @PostMapping("/{ticker}")
+    public ResponseEntity<StockResponseDTO> createStock(@PathVariable String ticker) {
+        StockEntity stock = stockService.createStock(ticker);
         return ResponseEntity.status(HttpStatus.CREATED).body(mapToDto(stock));
     }
 
@@ -32,9 +29,24 @@ public class StockController {
         return ResponseEntity.ok(stocks);
     }
 
+
+    @PutMapping("/{ticker}/refresh")
+    public ResponseEntity<StockResponseDTO> refreshStock(@PathVariable String ticker) {
+        StockEntity stock = stockService.refreshStock(ticker);
+        return ResponseEntity.ok(mapToDto(stock));
+    }
+
+
+    @DeleteMapping("/{ticker}")
+    public ResponseEntity<Void> deleteStock(@PathVariable String ticker) {
+         stockService.deleteStock(ticker);
+         return ResponseEntity.noContent().build();
+    }
+
+
     private StockResponseDTO mapToDto(StockEntity stock) {
         return new StockResponseDTO(
-                stock.getTicket(),
+                stock.getTicker(),
                 stock.getCompanyName(),
                 stock.getCurrentPrice(),
                 stock.getLastUpdated()

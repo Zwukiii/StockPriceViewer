@@ -25,7 +25,7 @@ public class StockService {
 
     public StockEntity createStock(String ticket) {
         StockEntity stock = new StockEntity();
-        stock.setTicket(ticket);
+        stock.setTicker(ticket);
         stock.setCompanyName(ticket);
         stock.setCurrentPrice(new BigDecimal("500.00"));
         stock.setLastUpdated(LocalDateTime.now());
@@ -46,7 +46,7 @@ public class StockService {
 
     }
 
-    public void deleteStock(String ticket) {
+    public StockEntity deleteStock(String ticket) {
         StockEntity stockTicket = stockRepository.findByTicket(ticket).orElseThrow(() -> new RuntimeException("Stock not found!"));
         stockRepository.delete(stockTicket);
     }
