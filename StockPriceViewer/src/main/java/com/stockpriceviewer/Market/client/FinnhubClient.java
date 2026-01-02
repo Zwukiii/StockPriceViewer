@@ -1,5 +1,4 @@
-package Market.client;
-
+package com.stockpriceviewer.Market.client;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -14,11 +13,13 @@ public class FinnhubClient {
     @Value("${finnhub.api.key}")
     private String apiKey;
 
-    public FinnhubClient(WebClient webClient) {
-        this.webClient = webClient;
+    public FinnhubClient(WebClient.Builder builder) {
+        this.webClient = builder
+                .baseUrl("https://finnhub.io/api/v1")
+                .build();
     }
 
-    public Mono<String> getStockPrice(String symbol) {
+    public Mono<FinnhubQuoteResponse> getStockQuote(String symbol) {
         return webClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/quote")
@@ -26,6 +27,6 @@ public class FinnhubClient {
                         .queryParam("token", apiKey)
                         .build())
                 .retrieve()
-                .bodyToMono(String.class);
+                .bodyToMono(FinnhubQuoteResponse.class);
     }
 }

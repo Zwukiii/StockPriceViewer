@@ -1,4 +1,4 @@
-package Market.client;
+package com.stockpriceviewer.Market.client;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;

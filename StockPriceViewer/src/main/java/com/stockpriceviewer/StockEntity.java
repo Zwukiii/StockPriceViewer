@@ -1,4 +1,4 @@
-package portfolio;
+package com.stockpriceviewer;
 
 
 import jakarta.persistence.*;

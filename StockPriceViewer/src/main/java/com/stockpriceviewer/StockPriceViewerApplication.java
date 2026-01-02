@@ -1,15 +1,13 @@
-package StockPriceViewer.StockPriceViewer;
+package com.stockpriceviewer;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+@SpringBootApplication(scanBasePackages = "com.stockpriceviewer")
 
-@SpringBootApplication
 public class StockPriceViewerApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(StockPriceViewerApplication.class, args);
     }
-
-
 }
