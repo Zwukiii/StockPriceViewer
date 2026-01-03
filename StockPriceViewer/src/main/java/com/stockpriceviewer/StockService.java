@@ -26,7 +26,12 @@ public class StockService {
     }
 
 
-    public StockEntity createStock(String ticker) {
+    public StockEntity createStock(String ticker) throws StockNotFoundException {
+
+        if (stockRepository.findByTicker(ticker).isPresent()) {
+            throw new StockNotFoundException("Stock already exists!" + ticker);
+        }
+
         ticker = ticker.trim().toUpperCase();
 
         FinnhubQuoteResponse quote = finnhubClient
