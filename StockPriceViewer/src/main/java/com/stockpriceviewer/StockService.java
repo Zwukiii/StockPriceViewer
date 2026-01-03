@@ -3,6 +3,7 @@ package com.stockpriceviewer;
 
 import com.stockpriceviewer.Market.client.FinnhubClient;
 import com.stockpriceviewer.Market.client.FinnhubQuoteResponse;
+import com.stockpriceviewer.portfolio.ENUM.AssetType;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.stereotype.Service;
@@ -25,53 +26,89 @@ public class StockService {
         this.finnhubClient = finnhubClient;
     }
 
-
-    public StockEntity createStock(String ticker) throws StockNotFoundException {
-
-        if (stockRepository.findByTicker(ticker).isPresent()) {
-            throw new StockNotFoundException("Stock already exists!" + ticker);
-        }
-
-        ticker = ticker.trim().toUpperCase();
-
-        FinnhubQuoteResponse quote = finnhubClient
-                .getStockQuote(ticker)
-                .block();
-
-        StockEntity stock = new StockEntity();
-        stock.setTicker(ticker);
-        stock.setCompanyName(ticker);
-        stock.setCurrentPrice(quote.getCurrentPrice());
-        stock.setLastUpdated(LocalDateTime.now());
-        return stockRepository.save(stock);
+    public StockEntity addStock(String ticker) {
+        return upsertAsset(ticker, AssetType.STOCK);
     }
+
+    public StockEntity addCrypto(String symbol) {
+        return upsertAsset(symbol, AssetType.CRYPTO);
+    }
+
 
     public List<StockEntity> getAllStocks() {
         return stockRepository.findAll();
     }
 
 
-    public StockEntity refreshStock(String ticker) {
-        ticker = ticker.trim().toUpperCase();
-        StockEntity stock = stockRepository.findByTicker(ticker)
-                .orElseThrow(() -> new StockNotFoundException("Stock not found!"));
+    public StockEntity refreshAsset(String symbol, AssetType assetType) {
+        symbol = normalize(symbol, assetType);
 
-        FinnhubQuoteResponse quote = finnhubClient
-                .getStockQuote(ticker)
-                .block();
+        StockEntity asset = stockRepository.findByTicker(symbol)
+                .orElseThrow(() -> new StockNotFoundException("Asset not found: " + assetType));
 
-        stock.setCurrentPrice(quote.getCurrentPrice());
-        stock.setLastUpdated(LocalDateTime.now());
+        FinnhubQuoteResponse quote = requireQuote(symbol);
 
-        return stockRepository.save(stock);
-    }
-    public void deleteStock(String ticker) {
-        ticker = ticker.trim().toUpperCase();
-        StockEntity stockTicket = stockRepository.findByTicker(ticker).orElseThrow(() -> new StockNotFoundException("Stock not found!"));
-        stockRepository.delete(stockTicket);
+        asset.setCurrentPrice(quote.getCurrentPrice());
+        asset.setLastUpdated(LocalDateTime.now());
+
+        return stockRepository.save(asset);
+
     }
 
-    public StockEntity getStockByTicker(String ticker) {
-        return stockRepository.findByTicker(ticker).orElseThrow(() -> new StockNotFoundException(ticker));
+    public void delete(String ticker) {
+        ticker = ticker.trim();
+        String finalTicker = ticker;
+        StockEntity asset = stockRepository.findByTicker(ticker)
+                .orElseThrow(() -> new StockNotFoundException("Asset not found: " + finalTicker));
+        stockRepository.delete(asset);
+    }
+
+    public StockEntity getByTicker(String ticker) {
+        return stockRepository.findByTicker(ticker)
+                .orElseThrow(() -> new StockNotFoundException("Asset not found: " + ticker));
+    }
+
+    public StockEntity upsertAsset(String symbol, AssetType type) {
+        symbol = symbol == null ? null : symbol.trim();
+
+        StockEntity asset = stockRepository.findByTicker(symbol)
+                .orElseGet(StockEntity::new);
+
+        FinnhubQuoteResponse quote = finnhubClient.getStockQuote(symbol).block();
+
+        asset.setTicker(symbol);
+        asset.setCompanyName(symbol);
+        asset.setCurrentPrice(quote.getCurrentPrice());
+        asset.setLastUpdated(LocalDateTime.now());
+        asset.setAssetType(type);
+
+        return stockRepository.save(asset);
+    }
+
+
+    private String normalize(String symbol, AssetType type) {
+        if (symbol == null) {
+            throw new IllegalArgumentException("Symbol cannot be null");
+        }
+
+        symbol = symbol.trim();
+        if (type == AssetType.STOCK) {
+            symbol = symbol.toUpperCase();
+        }
+
+        return symbol;
+
+    }
+
+    private FinnhubQuoteResponse requireQuote(String symbol) {
+        FinnhubQuoteResponse quote = finnhubClient.getStockQuote(symbol).block();
+
+        if (quote == null || quote.getCurrentPrice() == null) {
+            throw new IllegalArgumentException(
+                    "Finnhub returned no price data for symbol: " + symbol
+            );
+        }
+
+        return quote;
     }
 }

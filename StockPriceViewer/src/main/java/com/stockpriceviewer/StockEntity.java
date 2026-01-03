@@ -1,6 +1,7 @@
 package com.stockpriceviewer;
 
 
+import com.stockpriceviewer.portfolio.ENUM.AssetType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -37,5 +38,9 @@ public class StockEntity {
 
     @NotNull
     private LocalDateTime lastUpdated;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private AssetType assetType;
 
 }

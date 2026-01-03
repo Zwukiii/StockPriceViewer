@@ -1,4 +1,5 @@
 package com.stockpriceviewer;
+import com.stockpriceviewer.portfolio.ENUM.AssetType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +17,7 @@ public class StockController {
 
     @PostMapping("/{ticker}")
     public ResponseEntity<StockResponseDTO> createStock(@PathVariable String ticker) {
-        StockEntity stock = stockService.createStock(ticker);
+        StockEntity stock = stockService.addStock(ticker);
         return ResponseEntity.status(HttpStatus.CREATED).body(mapToDto(stock));
     }
 
@@ -32,20 +33,20 @@ public class StockController {
 
     @PutMapping("/{ticker}/refresh")
     public ResponseEntity<StockResponseDTO> refreshStock(@PathVariable String ticker) {
-        StockEntity stock = stockService.refreshStock(ticker);
+        StockEntity stock = stockService.refreshAsset(ticker, AssetType.STOCK);
         return ResponseEntity.ok(mapToDto(stock));
     }
 
 
     @DeleteMapping("/{ticker}")
     public ResponseEntity<Void> deleteStock(@PathVariable String ticker) {
-         stockService.deleteStock(ticker);
+         stockService.delete(ticker);
          return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{ticker}")
     public ResponseEntity<StockResponseDTO> getSingleStock(@PathVariable String ticker) {
-        StockEntity stock = stockService.getStockByTicker(ticker);
+        StockEntity stock = stockService.getByTicker(ticker);
         return ResponseEntity.ok(mapToDto(stock));
     }
 
